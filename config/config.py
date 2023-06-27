@@ -6,11 +6,14 @@ import mlflow
 from rich.logging import RichHandler
 
 # Assets
-PROJECTS_URL = (
-    "https://raw.githubusercontent.com/GokuMohandas/Made-With-ML/main/datasets/projects.csv"
-)
+PROJECTS_URL = "https://raw.githubusercontent.com/GokuMohandas/Made-With-ML/main/datasets/projects.csv"
 TAGS_URL = "https://raw.githubusercontent.com/GokuMohandas/Made-With-ML/main/datasets/tags.csv"
-ACCEPTED_TAGS = ["natural-language-processing", "computer-vision", "mlops", "graph-learning"]
+ACCEPTED_TAGS = [
+    "natural-language-processing",
+    "computer-vision",
+    "mlops",
+    "graph-learning",
+]
 
 # Directories
 BASE_DIR = Path(__file__).parent.parent.absolute()

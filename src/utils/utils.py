@@ -19,7 +19,9 @@ def load_dict(filepath: str) -> Dict:
     return d
 
 
-def save_dict(d: Dict, filepath: str, cls=None, sortkeys: bool = False) -> None:
+def save_dict(
+    d: Dict, filepath: str, cls=None, sortkeys: bool = False
+) -> None:
     """Save a dictionary to a specific location.
 
     Args:

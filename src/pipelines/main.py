@@ -78,7 +78,11 @@ def train_model(
 
         # Log artifacts
         with tempfile.TemporaryDirectory() as dp:
-            utils.save_dict(vars(artifacts["args"]), Path(dp, "args.json"), cls=NumpyEncoder)
+            utils.save_dict(
+                vars(artifacts["args"]),
+                Path(dp, "args.json"),
+                cls=NumpyEncoder,
+            )
             artifacts["label_encoder"].save(Path(dp, "label_encoder.json"))
             joblib.dump(artifacts["vectorizer"], Path(dp, "vectorizer.pkl"))
             joblib.dump(artifacts["model"], Path(dp, "model.pkl"))
@@ -88,12 +92,16 @@ def train_model(
     # Save to config
     if not test_run:  # pragma: no cover, actual run
         open(Path(config.CONFIG_DIR, "run_id.txt"), "w").write(run_id)
-        utils.save_dict(performance, Path(config.CONFIG_DIR, "performance.json"))
+        utils.save_dict(
+            performance, Path(config.CONFIG_DIR, "performance.json")
+        )
 
 
 @app.command()
 def optimize(
-    args_fp: str = "config/args.json", study_name: str = "optimization", num_trials: int = 20
+    args_fp: str = "config/args.json",
+    study_name: str = "optimization",
+    num_trials: int = 20,
 ) -> None:
     """Optimize hyperparameters.
 
@@ -108,8 +116,12 @@ def optimize(
     # Optimize
     args = Namespace(**utils.load_dict(filepath=args_fp))
     pruner = optuna.pruners.MedianPruner(n_startup_trials=5, n_warmup_steps=5)
-    study = optuna.create_study(study_name=study_name, direction="maximize", pruner=pruner)
-    mlflow_callback = MLflowCallback(tracking_uri=mlflow.get_tracking_uri(), metric_name="f1")
+    study = optuna.create_study(
+        study_name=study_name, direction="maximize", pruner=pruner
+    )
+    mlflow_callback = MLflowCallback(
+        tracking_uri=mlflow.get_tracking_uri(), metric_name="f1"
+    )
     study.optimize(
         lambda trial: train.objective(args, df, trial),
         n_trials=num_trials,
@@ -122,7 +134,9 @@ def optimize(
     args = {**args.__dict__, **study.best_trial.params}
     utils.save_dict(d=args, filepath=args_fp, cls=NumpyEncoder)
     logger.info(f"\nBest value (f1): {study.best_trial.value}")
-    logger.info(f"Best hyperparameters: {json.dumps(study.best_trial.params, indent=2)}")
+    logger.info(
+        f"Best hyperparameters: {json.dumps(study.best_trial.params, indent=2)}"
+    )
 
 
 def load_artifacts(run_id: str = None) -> Dict:
@@ -139,14 +153,22 @@ def load_artifacts(run_id: str = None) -> Dict:
 
     # Locate specifics artifacts directory
     experiment_id = mlflow.get_run(run_id=run_id).info.experiment_id
-    artifacts_dir = Path(config.MODEL_REGISTRY, experiment_id, run_id, "artifacts")
+    artifacts_dir = Path(
+        config.MODEL_REGISTRY, experiment_id, run_id, "artifacts"
+    )
 
     # Load objects from run
-    args = Namespace(**utils.load_dict(filepath=Path(artifacts_dir, "args.json")))
+    args = Namespace(
+        **utils.load_dict(filepath=Path(artifacts_dir, "args.json"))
+    )
     vectorizer = joblib.load(Path(artifacts_dir, "vectorizer.pkl"))
-    label_encoder = data.LabelEncoder.load(fp=Path(artifacts_dir, "label_encoder.json"))
+    label_encoder = data.LabelEncoder.load(
+        fp=Path(artifacts_dir, "label_encoder.json")
+    )
     model = joblib.load(Path(artifacts_dir, "model.pkl"))
-    performance = utils.load_dict(filepath=Path(artifacts_dir, "performance.json"))
+    performance = utils.load_dict(
+        filepath=Path(artifacts_dir, "performance.json")
+    )
 
     return {
         "args": args,

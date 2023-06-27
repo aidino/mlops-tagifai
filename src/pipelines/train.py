@@ -16,7 +16,9 @@ from src.pipelines import data, evaluate, predict
 from src.utils import utils
 
 
-def train(args: Namespace, df: pd.DataFrame, trial: optuna.trial._trial.Trial = None) -> Dict:
+def train(
+    args: Namespace, df: pd.DataFrame, trial: optuna.trial._trial.Trial = None
+) -> Dict:
     """Train model on data.
 
     Args:
@@ -38,14 +40,18 @@ def train(args: Namespace, df: pd.DataFrame, trial: optuna.trial._trial.Trial = 
     df = df[: args.subset]  # None = all samples
 
     # Preprocess
-    df = data.preprocess(df, lower=args.lower, stem=args.stem, min_freq=args.min_freq)
+    df = data.preprocess(
+        df, lower=args.lower, stem=args.stem, min_freq=args.min_freq
+    )
     label_encoder = data.LabelEncoder().fit(df.tag)
 
     # Split data
     X_train, X_val, X_test, y_train, y_val, y_test = data.get_data_splits(
         X=df.text.to_numpy(), y=label_encoder.encode(df.tag)
     )
-    test_df = pd.DataFrame({"text": X_test, "tag": label_encoder.decode(y_test)})
+    test_df = pd.DataFrame(
+        {"text": X_test, "tag": label_encoder.decode(y_test)}
+    )
 
     # Tf-idf
     vectorizer = TfidfVectorizer(
@@ -85,7 +91,9 @@ def train(args: Namespace, df: pd.DataFrame, trial: optuna.trial._trial.Trial = 
 
         # Log
         if not trial:
-            mlflow.log_metrics({"train_loss": train_loss, "val_loss": val_loss}, step=epoch)
+            mlflow.log_metrics(
+                {"train_loss": train_loss, "val_loss": val_loss}, step=epoch
+            )
 
         # Pruning (for optimization in next section)
         if trial:  # pragma: no cover, optuna pruning
@@ -96,12 +104,16 @@ def train(args: Namespace, df: pd.DataFrame, trial: optuna.trial._trial.Trial = 
     # Threshold
     y_pred = model.predict(X_val)
     y_prob = model.predict_proba(X_val)
-    args.threshold = np.quantile([y_prob[i][j] for i, j in enumerate(y_pred)], q=0.25)  # Q1
+    args.threshold = np.quantile(
+        [y_prob[i][j] for i, j in enumerate(y_pred)], q=0.25
+    )  # Q1
 
     # Evaluation
     other_index = label_encoder.class_to_index["other"]
     y_prob = model.predict_proba(X_test)
-    y_pred = predict.custom_predict(y_prob=y_prob, threshold=args.threshold, index=other_index)
+    y_pred = predict.custom_predict(
+        y_prob=y_prob, threshold=args.threshold, index=other_index
+    )
     performance = evaluate.get_metrics(
         y_true=y_test, y_pred=y_pred, classes=label_encoder.classes, df=test_df
     )
@@ -115,7 +127,9 @@ def train(args: Namespace, df: pd.DataFrame, trial: optuna.trial._trial.Trial = 
     }
 
 
-def objective(args: Namespace, df: pd.DataFrame, trial: optuna.trial._trial.Trial) -> float:
+def objective(
+    args: Namespace, df: pd.DataFrame, trial: optuna.trial._trial.Trial
+) -> float:
     """Objective function for optimization trials.
 
     Args:
@@ -127,7 +141,9 @@ def objective(args: Namespace, df: pd.DataFrame, trial: optuna.trial._trial.Tria
         float: metric value to be used for optimization.
     """
     # Parameters to tune
-    args.analyzer = trial.suggest_categorical("analyzer", ["word", "char", "char_wb"])
+    args.analyzer = trial.suggest_categorical(
+        "analyzer", ["word", "char", "char_wb"]
+    )
     args.ngram_max_range = trial.suggest_int("ngram_max_range", 3, 10)
     args.learning_rate = trial.suggest_loguniform("learning_rate", 1e-2, 1e0)
     args.power_t = trial.suggest_uniform("power_t", 0.1, 0.5)

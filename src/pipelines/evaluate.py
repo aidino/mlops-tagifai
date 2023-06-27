@@ -20,7 +20,9 @@ def short_text(x):
     return len(x.text.split()) < 8  # less than 8 words
 
 
-def get_slice_metrics(y_true: np.ndarray, y_pred: np.ndarray, slices: np.recarray) -> Dict:
+def get_slice_metrics(
+    y_true: np.ndarray, y_pred: np.ndarray, slices: np.recarray
+) -> Dict:
     """Generate metrics for slices of data.
 
     Args:
@@ -48,7 +50,10 @@ def get_slice_metrics(y_true: np.ndarray, y_pred: np.ndarray, slices: np.recarra
 
 
 def get_metrics(
-    y_true: np.ndarray, y_pred: np.ndarray, classes: List, df: pd.DataFrame = None
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    classes: List,
+    df: pd.DataFrame = None,
 ) -> Dict:
     """Performance metrics using ground truths and predictions.
 
@@ -65,14 +70,18 @@ def get_metrics(
     metrics = {"overall": {}, "class": {}}
 
     # Overall metrics
-    overall_metrics = precision_recall_fscore_support(y_true, y_pred, average="weighted")
+    overall_metrics = precision_recall_fscore_support(
+        y_true, y_pred, average="weighted"
+    )
     metrics["overall"]["precision"] = overall_metrics[0]
     metrics["overall"]["recall"] = overall_metrics[1]
     metrics["overall"]["f1"] = overall_metrics[2]
     metrics["overall"]["num_samples"] = np.float64(len(y_true))
 
     # Per-class metrics
-    class_metrics = precision_recall_fscore_support(y_true, y_pred, average=None)
+    class_metrics = precision_recall_fscore_support(
+        y_true, y_pred, average=None
+    )
     for i, _class in enumerate(classes):
         metrics["class"][_class] = {
             "precision": class_metrics[0][i],
@@ -84,6 +93,8 @@ def get_metrics(
     # Slice metrics
     if df is not None:
         slices = PandasSFApplier([nlp_cnn, short_text]).apply(df)
-        metrics["slices"] = get_slice_metrics(y_true=y_true, y_pred=y_pred, slices=slices)
+        metrics["slices"] = get_slice_metrics(
+            y_true=y_true, y_pred=y_pred, slices=slices
+        )
 
     return metrics
