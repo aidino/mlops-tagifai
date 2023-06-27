@@ -14,7 +14,7 @@ activate:
 setup: initialize_git install
 
 test:
-	pytest
+	pytest -m "not training"
 
 ## Delete all compiled Python files
 clean:
