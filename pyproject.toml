@@ -24,6 +24,7 @@ numpyencoder = "^0.3.0"
 nltk = "^3.8.1"
 imblearn = "^0.0"
 snorkel = "^0.9.9"
+boto3 = "^1.26.161"
 
 
 [tool.poetry.dev-dependencies]

@@ -1,4 +1,5 @@
 import json
+import os
 import tempfile
 import warnings
 from argparse import Namespace
@@ -85,9 +86,10 @@ def train_model(
             )
             artifacts["label_encoder"].save(Path(dp, "label_encoder.json"))
             joblib.dump(artifacts["vectorizer"], Path(dp, "vectorizer.pkl"))
-            joblib.dump(artifacts["model"], Path(dp, "model.pkl"))
+            # joblib.dump(artifacts["model"], Path(dp, "model.pkl"))
             utils.save_dict(performance, Path(dp, "performance.json"))
-            mlflow.log_artifacts(dp)
+            mlflow.log_artifacts(dp, artifact_path="artifacts")
+            mlflow.sklearn.log_model(artifacts["model"], "model")
 
     # Save to config
     if not test_run:  # pragma: no cover, actual run
@@ -151,24 +153,21 @@ def load_artifacts(run_id: str = None) -> Dict:
     if not run_id:
         run_id = open(Path(config.CONFIG_DIR, "run_id.txt")).read()
 
-    # Locate specifics artifacts directory
-    experiment_id = mlflow.get_run(run_id=run_id).info.experiment_id
-    artifacts_dir = Path(
-        config.MODEL_REGISTRY, experiment_id, run_id, "artifacts"
-    )
-
-    # Load objects from run
-    args = Namespace(
-        **utils.load_dict(filepath=Path(artifacts_dir, "args.json"))
-    )
-    vectorizer = joblib.load(Path(artifacts_dir, "vectorizer.pkl"))
-    label_encoder = data.LabelEncoder.load(
-        fp=Path(artifacts_dir, "label_encoder.json")
-    )
-    model = joblib.load(Path(artifacts_dir, "model.pkl"))
-    performance = utils.load_dict(
-        filepath=Path(artifacts_dir, "performance.json")
-    )
+    client = mlflow.tracking.MlflowClient()
+    with tempfile.TemporaryDirectory() as dp:
+        client.download_artifacts(run_id, "", dp)
+        print(f"TTTT => {os.listdir(dp)}")
+        args = Namespace(
+            **utils.load_dict(filepath=Path(dp, "artifacts", "args.json"))
+        )
+        vectorizer = joblib.load(Path(dp, "artifacts", "vectorizer.pkl"))
+        label_encoder = data.LabelEncoder.load(
+            fp=Path(dp, "artifacts", "label_encoder.json")
+        )
+        performance = utils.load_dict(
+            filepath=Path(dp, "artifacts", "performance.json")
+        )
+        model = joblib.load(Path(dp, "model", "model.pkl"))
 
     return {
         "args": args,
