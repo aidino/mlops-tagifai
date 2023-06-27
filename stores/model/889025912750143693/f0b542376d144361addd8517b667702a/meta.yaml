@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/ngohongthai/Documents/projects/mlops-tagifai/stores/model/889025912750143693/f0b542376d144361addd8517b667702a/artifacts
+end_time: 1687883500668
+entry_point_name: ''
+experiment_id: '889025912750143693'
+lifecycle_stage: active
+run_id: f0b542376d144361addd8517b667702a
+run_name: '0'
+run_uuid: f0b542376d144361addd8517b667702a
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1687883500661
+status: 3
+tags: []
+user_id: ngohongthai
