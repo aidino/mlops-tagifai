@@ -33,7 +33,7 @@ LOGS_DIR.mkdir(parents=True, exist_ok=True)
 BLOB_STORE.mkdir(parents=True, exist_ok=True)
 
 # MLFlow model registry
-mlflow.set_tracking_uri("http://localhost:8000")
+mlflow.set_tracking_uri("http://192.168.24.254:5000")
 
 # Logger
 logging_config = {

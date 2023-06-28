@@ -18,14 +18,23 @@ from config import config
 from config.config import logger
 from src.pipelines import data, predict, train
 from src.utils import utils
+from prefect import flow, task
+from prefect.runtime import flow_run, task_run
+import datetime
 
 warnings.filterwarnings("ignore")
 
 # Initialize Typer CLI app
 app = typer.Typer()
 
+def generate_task_name():
+    flow_name = flow_run.flow_name
+    task_name = task_run.task_name
+    date = datetime.datetime.utcnow()
+    return f"[{date:%x}][{flow_name}]{task_name}"
 
 @app.command()
+@task(task_run_name=generate_task_name,)
 def elt_data():
     """Extract, load and transform our data assets."""
     # Extract + Load
@@ -43,6 +52,7 @@ def elt_data():
 
 
 @app.command()
+@task(task_run_name=generate_task_name,)
 def train_model(
     args_fp: str = "config/args.json",
     experiment_name: str = "baselines",
@@ -100,6 +110,7 @@ def train_model(
 
 
 @app.command()
+@task(task_run_name=generate_task_name,)
 def optimize(
     args_fp: str = "config/args.json",
     study_name: str = "optimization",
@@ -156,7 +167,6 @@ def load_artifacts(run_id: str = None) -> Dict:
     client = mlflow.tracking.MlflowClient()
     with tempfile.TemporaryDirectory() as dp:
         client.download_artifacts(run_id, "", dp)
-        print(f"TTTT => {os.listdir(dp)}")
         args = Namespace(
             **utils.load_dict(filepath=Path(dp, "artifacts", "args.json"))
         )
@@ -193,6 +203,18 @@ def predict_tag(text: str = "", run_id: str = None) -> None:
     logger.info(json.dumps(prediction, indent=2))
     return prediction
 
+@app.command()
+@flow(name="elt-data-pipeline")
+def elt_data_pipeline():
+    """Pipeline to extract, load, and transform data."""
+    elt_data()
+
+@app.command()
+@flow(name="train model pipeline")
+def train_model_pipeline(args_fp: str = "config/args.json", experiment_name: str = "baselines", run_name: str = "sgd"):
+    """Pipeline to train model."""
+    optimize(args_fp, study_name = "optimization", num_trials = 20)
+    train_model(args_fp, experiment_name, run_name)
 
 if __name__ == "__main__":
     app()  # pragma: no cover, live app
