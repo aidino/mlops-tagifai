@@ -4,6 +4,7 @@ from pathlib import Path
 
 import mlflow
 from rich.logging import RichHandler
+from typing import Text
 
 # Assets
 PROJECTS_URL = "https://raw.githubusercontent.com/GokuMohandas/Made-With-ML/main/datasets/projects.csv"
@@ -14,6 +15,9 @@ ACCEPTED_TAGS = [
     "mlops",
     "graph-learning",
 ]
+
+# DB for moniroring
+DATABASE_URI: Text = "postgresql://admin:admin@192.168.24.254:5432/monitoring_db"
 
 # Directories
 BASE_DIR = Path(__file__).parent.parent.absolute()

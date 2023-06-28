@@ -46,7 +46,13 @@ def elt_data():
     # Transform
     df = pd.merge(projects, tags, on="id")
     df = df[df.tag.notnull()]  # drop rows w/ no tag
-    df.to_csv(Path(config.DATA_DIR, "labeled_projects.csv"), index=False)
+    
+    # last 100 sample for testing
+    test_df = df[-300:]
+    train_df = df[:-300]
+    
+    train_df.to_csv(Path(config.DATA_DIR, "labeled_projects.csv"), index=False)
+    test_df.to_csv(Path(config.DATA_DIR, "test_labeled_projects.csv"), index=False)
 
     logger.info("✅ Saved data!")
 
@@ -189,7 +195,7 @@ def load_artifacts(run_id: str = None) -> Dict:
 
 
 @app.command()
-def predict_tag(text: str = "", run_id: str = None) -> None:
+def predict_tag(text: str = "", run_id: str = None):
     """Predict tag for text.
 
     Args:

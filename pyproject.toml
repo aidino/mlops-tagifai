@@ -25,6 +25,12 @@ nltk = "^3.8.1"
 imblearn = "^0.0"
 snorkel = "^0.9.9"
 boto3 = "^1.26.161"
+llvmlite = "^0.40.1"
+evidently = "^0.3.3"
+seaborn = "^0.12.2"
+sqlalchemy = "^2.0.17"
+psycopg2-binary = "^2.9.6"
+pendulum = "^2.1.2"
 
 
 [tool.poetry.dev-dependencies]
