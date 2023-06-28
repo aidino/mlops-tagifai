@@ -213,6 +213,7 @@ def elt_data_pipeline():
 @flow(name="train model pipeline")
 def train_model_pipeline(args_fp: str = "config/args.json", experiment_name: str = "baselines", run_name: str = "sgd"):
     """Pipeline to train model."""
+    elt_data()
     optimize(args_fp, study_name = "optimization", num_trials = 20)
     train_model(args_fp, experiment_name, run_name)
 
